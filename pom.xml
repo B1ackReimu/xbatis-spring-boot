@@ -11,6 +11,7 @@
     <modules>
         <module>xbatis-spring-boot-autoconfigure</module>
         <module>xbatis-spring-boot-starter</module>
+        <module>xbatis-spring-boot-autoconfigure-test</module>
     </modules>
 
     <properties>

@@ -1,16 +1,18 @@
 package org.xbatis.spring.boot.autoconfigure;
 
-import com.zaxxer.hikari.HikariDataSource;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
-
+@Configuration
+@ConditionalOnBean(A.class)
 public class TestConfiguration {
 
-    public SqlSessionFactoryBean sqlSessionFactoryBean(){
-        MybatisAutoConfiguration mybatisAutoConfiguration = new MybatisAutoConfiguration();
+    public TestConfiguration(@Qualifier(value = "b") A a) {
+        System.out.println("TestConfiguration:" + a.getClassName());
     }
 
+
+
 }
+

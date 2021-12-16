@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.xbatis.spring.boot.autoconfigure.TestConfiguration
