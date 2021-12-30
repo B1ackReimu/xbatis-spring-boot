@@ -1,6 +1,5 @@
 package org.xbatis.spring.boot.autoconfigure;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +13,7 @@ public class XbatisProperties implements EnvironmentAware {
 
     public final static String PREFIX = "xbatis";
 
-    private HashMap<String, ShardAlgorithm> algorithmHashMap = new HashMap<>();
+    private final HashMap<String, ShardAlgorithm> algorithmHashMap = new HashMap<>();
 
     @Bean("dbRouter")
     HashMap<String,HashMap<String,XDBRouter>> dbRouter(){
