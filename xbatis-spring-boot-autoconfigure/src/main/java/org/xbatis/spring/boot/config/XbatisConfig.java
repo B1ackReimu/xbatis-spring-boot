@@ -11,7 +11,7 @@ public final class XbatisConfig {
         return xbatisNamespace;
     }
 
-    private class XbatisNamespace {
+    public static class XbatisNamespace {
         private String name;
         private HashSet<XbatisGroup> groups;
 
@@ -20,15 +20,24 @@ public final class XbatisConfig {
         }
 
         public XbatisGroup addGroup(String name){
-            XbatisGroup xbatisGroup = new XbatisGroup();
+            XbatisGroup xbatisGroup = new XbatisGroup(name);
             groups.add(xbatisGroup);
             return xbatisGroup;
         }
 
-        private class XbatisGroup {
+        public static class XbatisGroup {
             private String name;
             private HashSet<XbatisDatabase> masters;
             private HashSet<XbatisDatabase> slaves;
+
+            public XbatisGroup(String name) {
+                this.name = name;
+            }
+
+            public XbatisDatabase addDatabase(){
+                return null;
+            }
+
             private class XbatisDatabase{
 
             }
