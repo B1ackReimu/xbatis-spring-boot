@@ -3,17 +3,16 @@ package org.xbatis.spring.boot.autoconfigure;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.xbatis.spring.boot.config.XbatisDataSource;
 
 @Configuration
-@ConditionalOnBean(A.class)
-@EnableConfigurationProperties(XbatisProperties.class)
+@ConditionalOnSingleCandidate(XbatisDataSource.class)
 public class TestConfiguration implements ApplicationContextAware {
 
     private A a;
