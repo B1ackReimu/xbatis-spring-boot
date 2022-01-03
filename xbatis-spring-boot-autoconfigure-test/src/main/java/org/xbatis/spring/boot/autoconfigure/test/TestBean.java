@@ -2,6 +2,7 @@ package org.xbatis.spring.boot.autoconfigure.test;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xbatis.spring.boot.autoconfigure.A;

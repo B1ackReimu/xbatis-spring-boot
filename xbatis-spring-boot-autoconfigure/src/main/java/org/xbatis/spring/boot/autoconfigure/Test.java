@@ -16,7 +16,7 @@ public class Test {
             System.out.println(Thread.currentThread().getId() + ":" + dataKey.get());
         }).start();
         System.out.println(dataKey.get());
-        XbatisDataSource xbatisDataSource = new XbatisDataSource();
+        //XbatisDataSource xbatisDataSource = new XbatisDataSource();
     }
 
 }
