@@ -1,20 +1,20 @@
 package org.xbatis.spring.boot.config;
 
-import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.xbatis.spring.boot.ShardAlgorithm;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 public final class XbatisDataSource {
 
     private final HashSet<XbatisNamespace> namespaces = new HashSet<>();
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    public XbatisNamespace addNamespace(String name, Class<? extends DataSource> type, String driverClassName) {
-        XbatisNamespace xbatisNamespace = new XbatisNamespace(name, type, driverClassName);
+    public XbatisNamespace addNamespace(String name, Class<? extends DataSource> type, String driverClassName, ShardAlgorithm groupShardAlgorithm, String[] groupShardKey) {
+        XbatisNamespace xbatisNamespace = new XbatisNamespace(name, type, driverClassName, groupShardAlgorithm, groupShardKey);
         namespaces.add(xbatisNamespace);
         return xbatisNamespace;
     }
@@ -24,51 +24,66 @@ public final class XbatisDataSource {
     }
 
     public class XbatisNamespace {
-        String name;
-        Class<? extends DataSource> type;
+        private String spaceName;
+        private Class<? extends DataSource> type;
         private final String driverClassName;
-        HashSet<XbatisGroup> groups = new HashSet<>();
-        HashSet<XbatisTable> tables = new HashSet<>();
+        private final HashSet<XbatisGroup> groups = new HashSet<>();
+        private final HashSet<XbatisTable> tables = new HashSet<>();
+        private ShardAlgorithm groupShardAlgorithm;
+        private String[] groupShardKeys;
 
-        public XbatisNamespace(String name, Class<? extends DataSource> type, String driverClassName) {
-            this.name = name;
+        public XbatisNamespace(String spaceName, Class<? extends DataSource> type, String driverClassName, ShardAlgorithm groupShardAlgorithm, String[] groupShardKeys) {
+            this.spaceName = spaceName;
             this.type = type;
             this.driverClassName = driverClassName;
+            this.groupShardAlgorithm = groupShardAlgorithm;
+            this.groupShardKeys = groupShardKeys;
         }
 
-        public XbatisGroup addGroup(String name, ShardAlgorithm algorithmClass, String[] shardKey) {
-            XbatisGroup xbatisGroup = new XbatisGroup(name, algorithmClass, shardKey);
+        public XbatisGroup addGroup(String groupSuffix) {
+            XbatisGroup xbatisGroup = new XbatisGroup(groupSuffix);
             groups.add(xbatisGroup);
             return xbatisGroup;
         }
 
-        public void addTable(String name, ShardAlgorithm algorithmClass, String[] shardKey) {
-            tables.add(new XbatisTable(name, algorithmClass, shardKey));
+        public void addTable(String tableName, ShardAlgorithm algorithmClass, String[] shardKey) {
+            tables.add(new XbatisTable(tableName, algorithmClass, shardKey));
+        }
+
+        protected XbatisGroup getGroup(String... shardValue) {
+            for (XbatisGroup group : groups) {
+                if (Objects.equals(groupShardAlgorithm.shardSuffix(shardValue), group.groupSuffix)) {
+                    return group;
+                }
+            }
+            return null;
+        }
+
+        protected String[] getGroupShardKeys(){
+            return groupShardKeys;
         }
 
         private class XbatisTable {
-            String name;
+            String tableName;
             ShardAlgorithm algorithmClass;
             String[] shardKey;
 
-            public XbatisTable(String name, ShardAlgorithm algorithmClass, String[] shardKey) {
-                this.name = name;
+            public XbatisTable(String tableName, ShardAlgorithm algorithmClass, String[] shardKey) {
+                this.tableName = tableName;
                 this.algorithmClass = algorithmClass;
                 this.shardKey = shardKey;
             }
+
+
         }
 
         public class XbatisGroup {
-            String name;
-            ShardAlgorithm algorithmClass;
-            String[] shardKey;
-            HashSet<XbatisDatabase> masters = new HashSet<>();
-            HashSet<XbatisDatabase> slaves = new HashSet<>();
+            String groupSuffix;
+            ArrayList<XbatisDatabase> masters = new ArrayList<>();
+            ArrayList<XbatisDatabase> slaves = new ArrayList<>();
 
-            public XbatisGroup(String name, ShardAlgorithm algorithmClass, String[] shardKey) {
-                this.name = name;
-                this.algorithmClass = algorithmClass;
-                this.shardKey = shardKey;
+            public XbatisGroup(String groupSuffix) {
+                this.groupSuffix = groupSuffix;
             }
 
             public XbatisGroup addMaster(String url, String username, String password) {
@@ -81,7 +96,15 @@ public final class XbatisDataSource {
                 return this;
             }
 
-            private class XbatisDatabase {
+            protected ArrayList<XbatisDatabase> getMasters() {
+                return masters;
+            }
+
+            protected ArrayList<XbatisDatabase> getSlaves() {
+                return slaves;
+            }
+
+            class XbatisDatabase {
 
                 final String url;
                 final String username;
@@ -95,7 +118,7 @@ public final class XbatisDataSource {
                     createDataSource();
                 }
 
-                private void createDataSource(){
+                private void createDataSource() {
                     DataSourceProperties dataSourceProperties = new DataSourceProperties();
                     dataSourceProperties.setPassword(password);
                     dataSourceProperties.setUsername(username);
@@ -110,6 +133,7 @@ public final class XbatisDataSource {
                         e.printStackTrace();
                     }
                 }
+
             }
         }
     }

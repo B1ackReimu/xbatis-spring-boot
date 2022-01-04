@@ -29,11 +29,11 @@ public class TestBean implements BeanClassLoaderAware {
     }
 
     @Bean
-    public XbatisDataSource xbatisConfig(){
+    public XbatisDataSource xbatisConfig() {
         XbatisDataSource xbatisDataSource = new XbatisDataSource(classLoader);
-        XbatisDataSource.XbatisNamespace ns1 = xbatisDataSource.addNamespace("ns1", HikariDataSource.class, "com.mysql.cj.jdbc.Driver");
-        ns1.addGroup("g1", new TestSA(),new String[]{"zxc"})
-                .addMaster("192.168.44.1","zxc","asdas");
+        XbatisDataSource.XbatisNamespace ns1 = xbatisDataSource.addNamespace("ns1", HikariDataSource.class, "com.mysql.cj.jdbc.Driver", new TestSA(), new String[]{"zxc"});
+        ns1.addGroup("g1")
+                .addMaster("192.168.44.1", "zxc", "asdas");
         return xbatisDataSource;
     }
 
