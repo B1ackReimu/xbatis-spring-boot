@@ -1,4 +1,4 @@
-package org.xbatis.spring.boot.config;
+package org.xbatis.spring.boot.datasource;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.xbatis.spring.boot.ShardAlgorithm;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 
-public final class XbatisDataSource {
+public final class XbatisDataSourceConfig {
 
     private final HashSet<XbatisNamespace> namespaces = new HashSet<>();
     private final ClassLoader classLoader;
@@ -19,7 +19,16 @@ public final class XbatisDataSource {
         return xbatisNamespace;
     }
 
-    public XbatisDataSource(ClassLoader classLoader) {
+    public XbatisNamespace getNamespace(String spaceName) {
+        for (XbatisNamespace namespace : namespaces) {
+            if (Objects.equals(spaceName, namespace.spaceName)) {
+                return namespace;
+            }
+        }
+        return null;
+    }
+
+    public XbatisDataSourceConfig(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
@@ -59,7 +68,7 @@ public final class XbatisDataSource {
             return null;
         }
 
-        protected String[] getGroupShardKeys(){
+        protected String[] getGroupShardKeys() {
             return groupShardKeys;
         }
 
@@ -125,7 +134,7 @@ public final class XbatisDataSource {
                     dataSourceProperties.setUrl(url);
                     dataSourceProperties.setDriverClassName(XbatisNamespace.this.driverClassName);
                     dataSourceProperties.setType(XbatisNamespace.this.type);
-                    dataSourceProperties.setBeanClassLoader(XbatisDataSource.this.classLoader);
+                    dataSourceProperties.setBeanClassLoader(XbatisDataSourceConfig.this.classLoader);
                     this.dataSource = dataSourceProperties.initializeDataSourceBuilder().build();
                     try {
                         dataSourceProperties.afterPropertiesSet();

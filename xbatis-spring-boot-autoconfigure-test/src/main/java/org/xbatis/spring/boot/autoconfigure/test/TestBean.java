@@ -2,11 +2,10 @@ package org.xbatis.spring.boot.autoconfigure.test;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xbatis.spring.boot.autoconfigure.A;
-import org.xbatis.spring.boot.config.XbatisDataSource;
+import org.xbatis.spring.boot.datasource.XbatisDataSourceConfig;
 
 @Configuration
 public class TestBean implements BeanClassLoaderAware {
@@ -29,12 +28,12 @@ public class TestBean implements BeanClassLoaderAware {
     }
 
     @Bean
-    public XbatisDataSource xbatisConfig() {
-        XbatisDataSource xbatisDataSource = new XbatisDataSource(classLoader);
-        XbatisDataSource.XbatisNamespace ns1 = xbatisDataSource.addNamespace("ns1", HikariDataSource.class, "com.mysql.cj.jdbc.Driver", new TestSA(), new String[]{"zxc"});
+    public XbatisDataSourceConfig xbatisConfig() {
+        XbatisDataSourceConfig xbatisDataSourceConfig = new XbatisDataSourceConfig(classLoader);
+        XbatisDataSourceConfig.XbatisNamespace ns1 = xbatisDataSourceConfig.addNamespace("ns1", HikariDataSource.class, "com.mysql.cj.jdbc.Driver", new TestSA(), new String[]{"zxc"});
         ns1.addGroup("g1")
                 .addMaster("192.168.44.1", "zxc", "asdas");
-        return xbatisDataSource;
+        return xbatisDataSourceConfig;
     }
 
     @Override

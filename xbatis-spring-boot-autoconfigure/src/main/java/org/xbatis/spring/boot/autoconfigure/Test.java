@@ -1,7 +1,5 @@
 package org.xbatis.spring.boot.autoconfigure;
 
-import org.xbatis.spring.boot.config.XbatisDataSource;
-
 public class Test {
 
     private static final ThreadLocal<String> dataKey = new ThreadLocal<>();
@@ -16,7 +14,7 @@ public class Test {
             System.out.println(Thread.currentThread().getId() + ":" + dataKey.get());
         }).start();
         System.out.println(dataKey.get());
-        //XbatisDataSource xbatisDataSource = new XbatisDataSource();
+        //XbatisDataSourceConfig xbatisDataSource = new XbatisDataSourceConfig();
     }
 
 }
