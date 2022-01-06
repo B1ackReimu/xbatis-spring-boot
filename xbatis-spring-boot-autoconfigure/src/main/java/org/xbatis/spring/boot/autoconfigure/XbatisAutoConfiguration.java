@@ -1,23 +1,18 @@
 package org.xbatis.spring.boot.autoconfigure;
 
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xbatis.spring.boot.annotation.Master;
 import org.xbatis.spring.boot.annotation.NameSpace;
-import org.xbatis.spring.boot.datasource.XbatisDataSourceConfig;
-import org.xbatis.spring.boot.datasource.XbatisRouter;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,11 +21,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ConditionalOnClass(XbatisDataSourceConfig.class)
 @Configuration
 @EnableConfigurationProperties({MybatisProperties.class})
-@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
+//@AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class XbatisAutoConfiguration {
 
     private final MybatisProperties properties;
     private final XbatisDataSourceConfig dataSourceConfig;
+    private SqlSessionFactory sqlSessionFactory;
+    private XbatisRouter xbatisRouter;
 
     public XbatisAutoConfiguration(MybatisProperties properties, XbatisDataSourceConfig dataSourceConfig) {
         this.properties = properties;
@@ -39,7 +36,24 @@ public class XbatisAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public XbatisRouter xbatisRouter(SqlSessionFactory sqlSessionFactory) throws ClassNotFoundException {
+    public XbatisRouter xbatisRouter() {
+        xbatisRouter = new XbatisRouter();
+        return xbatisRouter;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SqlSessionFactory sqlSessionFactory(XbatisRouter xbatisRouter) throws Exception {
+        SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+        factoryBean.setDataSource(xbatisRouter);
+        factoryBean.setMapperLocations(properties.resolveMapperLocations());
+        factoryBean.afterPropertiesSet();
+        sqlSessionFactory = factoryBean.getObject();
+        doSetRouter();
+        return sqlSessionFactory;
+    }
+
+    public void doSetRouter() throws Exception {
         ConcurrentHashMap<String, XbatisDataSourceConfig.XbatisNamespace> classShardAlgorithmMap = new ConcurrentHashMap<>();
         CopyOnWriteArraySet<String> methodIsMasterSet = new CopyOnWriteArraySet<>();
         Collection<MappedStatement> mappedStatements = sqlSessionFactory.getConfiguration().getMappedStatements();
@@ -56,29 +70,31 @@ public class XbatisAutoConfiguration {
                     if (Objects.nonNull(namespace)) {
                         classShardAlgorithmMap.put(className, namespace);
                         classMap.put(className, aClass);
+                    } else {
+                        throw new Exception("there is not namespace in XbatisDataSourceConfig: " + value);
+                    }
+                    for (Method method : aClass.getMethods()) {
+                        String methodFullName = className + method.getName();
+                        if (Objects.equals(methodFullName, className)) {
+                            if (method.isAnnotationPresent(Master.class)) {
+                                methodIsMasterSet.add(methodFullName);
+                            }
+                        }
                     }
                 } else {
-                    continue;
+                    throw new Exception("there is not namespace on class: " + className);
                 }
             }
-            for (Method method : aClass.getMethods()) {
-                String methodFullName = className + method.getName();
-                if (Objects.equals(methodFullName, className)) {
-                    if (method.isAnnotationPresent(Master.class)) {
-                        methodIsMasterSet.add(methodFullName);
-                    }
-                }
+            SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+            if (Objects.equals(sqlCommandType, SqlCommandType.INSERT) ||
+                    Objects.equals(sqlCommandType, SqlCommandType.DELETE) ||
+                    Objects.equals(sqlCommandType, SqlCommandType.UPDATE)) {
+                methodIsMasterSet.add(statementId);
             }
-        }
-        return new XbatisRouter(classShardAlgorithmMap, methodIsMasterSet);
-    }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public SqlSessionFactory sqlSessionFactory(XbatisRouter xbatisRouter) throws Exception {
-        SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
-        factoryBean.setDataSource(xbatisRouter);
-        factoryBean.setMapperLocations(properties.resolveMapperLocations());
-        return factoryBean.getObject();
+        }
+        xbatisRouter.setClassShardAlgorithmMap(classShardAlgorithmMap);
+        xbatisRouter.setMethodIsMasterSet(methodIsMasterSet);
+        sqlSessionFactory.getConfiguration().addInterceptor(new XbatisInterceptor());
     }
 }

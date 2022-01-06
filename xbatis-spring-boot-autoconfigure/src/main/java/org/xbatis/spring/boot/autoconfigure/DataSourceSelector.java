@@ -1,4 +1,4 @@
-package org.xbatis.spring.boot.datasource;
+package org.xbatis.spring.boot.autoconfigure;
 
 public class DataSourceSelector {
 

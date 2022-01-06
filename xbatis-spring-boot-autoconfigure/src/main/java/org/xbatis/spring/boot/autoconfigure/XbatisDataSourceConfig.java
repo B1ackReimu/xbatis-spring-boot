@@ -1,7 +1,6 @@
-package org.xbatis.spring.boot.datasource;
+package org.xbatis.spring.boot.autoconfigure;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.xbatis.spring.boot.ShardAlgorithm;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -33,13 +32,13 @@ public final class XbatisDataSourceConfig {
     }
 
     public class XbatisNamespace {
-        private String spaceName;
-        private Class<? extends DataSource> type;
+        private final String spaceName;
+        private final Class<? extends DataSource> type;
         private final String driverClassName;
         private final HashSet<XbatisGroup> groups = new HashSet<>();
         private final HashSet<XbatisTable> tables = new HashSet<>();
-        private ShardAlgorithm groupShardAlgorithm;
-        private String[] groupShardKeys;
+        private final ShardAlgorithm groupShardAlgorithm;
+        private final String[] groupShardKeys;
 
         public XbatisNamespace(String spaceName, Class<? extends DataSource> type, String driverClassName, ShardAlgorithm groupShardAlgorithm, String[] groupShardKeys) {
             this.spaceName = spaceName;

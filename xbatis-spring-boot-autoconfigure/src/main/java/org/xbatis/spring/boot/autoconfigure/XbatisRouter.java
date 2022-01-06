@@ -1,10 +1,10 @@
-package org.xbatis.spring.boot.datasource;
+package org.xbatis.spring.boot.autoconfigure;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-import org.xbatis.spring.boot.annotation.Master;
+import org.xbatis.spring.boot.autoconfigure.DataSourceSelector;
+import org.xbatis.spring.boot.autoconfigure.XbatisDataSourceConfig;
 
 import javax.sql.DataSource;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -12,12 +12,19 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class XbatisRouter extends AbstractRoutingDataSource {
 
-    private final ConcurrentHashMap<String, XbatisDataSourceConfig.XbatisNamespace> classShardAlgorithmMap;
-    private final CopyOnWriteArraySet<String> methodIsMasterSet;
+    private ConcurrentHashMap<String, XbatisDataSourceConfig.XbatisNamespace> classShardAlgorithmMap;
+    private CopyOnWriteArraySet<String> methodIsMasterSet;
 
-    public XbatisRouter(ConcurrentHashMap<String, XbatisDataSourceConfig.XbatisNamespace> classShardAlgorithmMap, CopyOnWriteArraySet<String> methodIsMasterSet) {
+    public void setClassShardAlgorithmMap(ConcurrentHashMap<String, XbatisDataSourceConfig.XbatisNamespace> classShardAlgorithmMap) {
         this.classShardAlgorithmMap = classShardAlgorithmMap;
+    }
+
+    public void setMethodIsMasterSet(CopyOnWriteArraySet<String> methodIsMasterSet) {
         this.methodIsMasterSet = methodIsMasterSet;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
     }
 
     @Override
@@ -27,14 +34,11 @@ public class XbatisRouter extends AbstractRoutingDataSource {
 
     @Override
     protected DataSource determineTargetDataSource() {
+
         String lookupKey = (String) determineCurrentLookupKey();
         XbatisDataSourceConfig.XbatisNamespace.XbatisGroup group = classShardAlgorithmMap.get(lookupKey)
                 .getGroup(DataSourceSelector.getLocalShareValue());
         return randomDataSource(methodIsMasterSet.contains(lookupKey), group);
-    }
-
-    @Override
-    public void afterPropertiesSet() {
     }
 
     private DataSource randomDataSource(boolean isMaster, XbatisDataSourceConfig.XbatisNamespace.XbatisGroup group) {

@@ -1,4 +1,4 @@
-package org.xbatis.spring.boot;
+package org.xbatis.spring.boot.autoconfigure;
 
 public interface ShardAlgorithm {
 
