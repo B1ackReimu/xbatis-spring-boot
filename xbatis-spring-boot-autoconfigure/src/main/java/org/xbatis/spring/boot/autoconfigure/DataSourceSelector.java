@@ -3,10 +3,11 @@ package org.xbatis.spring.boot.autoconfigure;
 public class DataSourceSelector {
 
     private static final ThreadLocal<String> LOCAL_CLASS = new ThreadLocal<>();
+    private static final ThreadLocal<String> LOCAL_METHOD = new ThreadLocal<>();
     private static final ThreadLocal<String[]> LOCAL_SHARD_VALUE = new ThreadLocal<>();
 
-    public static void setLocalClass(String method){
-        LOCAL_CLASS.set(method);
+    public static void setLocalClass(String localClass){
+        LOCAL_CLASS.set(localClass);
     }
 
     protected static String getLocalClass(){
@@ -19,6 +20,14 @@ public class DataSourceSelector {
 
     protected static String[] getLocalShareValue(){
         return LOCAL_SHARD_VALUE.get();
+    }
+
+    public static void setLocalMethod(String localMethod){
+        LOCAL_METHOD.set(localMethod);
+    }
+
+    protected static String getLocalMethod(){
+        return LOCAL_METHOD.get();
     }
 
 }

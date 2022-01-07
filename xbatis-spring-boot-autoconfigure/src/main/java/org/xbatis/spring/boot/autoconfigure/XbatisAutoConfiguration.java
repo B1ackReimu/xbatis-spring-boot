@@ -74,11 +74,9 @@ public class XbatisAutoConfiguration {
                         throw new Exception("there is not namespace in XbatisDataSourceConfig: " + value);
                     }
                     for (Method method : aClass.getMethods()) {
-                        String methodFullName = className + method.getName();
-                        if (Objects.equals(methodFullName, className)) {
-                            if (method.isAnnotationPresent(Master.class)) {
-                                methodIsMasterSet.add(methodFullName);
-                            }
+                        String methodFullName = className + "." + method.getName();
+                        if (method.isAnnotationPresent(Master.class)) {
+                            methodIsMasterSet.add(methodFullName);
                         }
                     }
                 } else {
@@ -97,4 +95,6 @@ public class XbatisAutoConfiguration {
         xbatisRouter.setMethodIsMasterSet(methodIsMasterSet);
         sqlSessionFactory.getConfiguration().addInterceptor(new XbatisInterceptor());
     }
+
+
 }

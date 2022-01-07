@@ -43,6 +43,12 @@
             <version>8.0.22</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.6</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>
