@@ -10,8 +10,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.xbatis.spring.boot.annotation.Master;
-import org.xbatis.spring.boot.annotation.NameSpace;
+import org.xbatis.spring.boot.autoconfigure.annotation.Master;
+import org.xbatis.spring.boot.autoconfigure.annotation.NameSpace;
 
 import java.lang.reflect.Method;
 import java.util.*;

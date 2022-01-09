@@ -1,4 +1,4 @@
-package org.xbatis.spring.boot.annotation;
+package org.xbatis.spring.boot.autoconfigure.annotation;
 
 import java.lang.annotation.*;
 

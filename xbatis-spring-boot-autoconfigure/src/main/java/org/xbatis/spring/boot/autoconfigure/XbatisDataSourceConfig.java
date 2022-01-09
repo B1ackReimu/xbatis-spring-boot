@@ -3,9 +3,7 @@ package org.xbatis.spring.boot.autoconfigure;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public final class XbatisDataSourceConfig {
 
@@ -35,7 +33,7 @@ public final class XbatisDataSourceConfig {
         private final String spaceName;
         private final Class<? extends DataSource> type;
         private final String driverClassName;
-        private final HashSet<XbatisGroup> groups = new HashSet<>();
+        private final HashMap<String, XbatisGroup> groups = new HashMap<>();
         private final HashSet<XbatisTable> tables = new HashSet<>();
         private final ShardAlgorithm groupShardAlgorithm;
         private final String[] groupShardKeys;
@@ -50,7 +48,7 @@ public final class XbatisDataSourceConfig {
 
         public XbatisGroup addGroup(String groupSuffix) {
             XbatisGroup xbatisGroup = new XbatisGroup(groupSuffix);
-            groups.add(xbatisGroup);
+            groups.put(groupSuffix, xbatisGroup);
             return xbatisGroup;
         }
 
@@ -58,30 +56,28 @@ public final class XbatisDataSourceConfig {
             tables.add(new XbatisTable(tableName, algorithmClass, shardKey));
         }
 
-        protected XbatisGroup getGroup(String... shardValue) {
-            for (XbatisGroup group : groups) {
-                if (Objects.equals(groupShardAlgorithm.shardSuffix(shardValue), group.groupSuffix)) {
-                    return group;
-                }
-            }
-            return null;
+        protected XbatisGroup getGroup(Map<String,Object> args) {
+            return groups.get(groupShardAlgorithm.shardSuffix(args));
         }
 
         protected String[] getGroupShardKeys() {
             return groupShardKeys;
         }
 
-        private class XbatisTable {
+        public class XbatisTable {
             String tableName;
-            ShardAlgorithm algorithmClass;
+            ShardAlgorithm tableShardAlgorithm;
             String[] shardKey;
 
-            public XbatisTable(String tableName, ShardAlgorithm algorithmClass, String[] shardKey) {
+            public XbatisTable(String tableName, ShardAlgorithm tableShardAlgorithm, String[] shardKey) {
                 this.tableName = tableName;
-                this.algorithmClass = algorithmClass;
+                this.tableShardAlgorithm = tableShardAlgorithm;
                 this.shardKey = shardKey;
             }
 
+            public String getTableSuffix(Map<String,Object> args){
+                return tableShardAlgorithm.shardSuffix(args);
+            }
 
         }
 

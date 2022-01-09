@@ -1,7 +1,9 @@
 package org.xbatis.spring.boot.autoconfigure;
 
+import java.util.Map;
+
 public interface ShardAlgorithm {
 
-    String shardSuffix(String... args);
+    String shardSuffix(Map<String,Object> args);
 
 }
