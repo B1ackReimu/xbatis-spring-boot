@@ -34,7 +34,7 @@ public final class XbatisDataSourceConfig {
         private final Class<? extends DataSource> type;
         private final String driverClassName;
         private final HashMap<String, XbatisGroup> groups = new HashMap<>();
-        private final HashSet<XbatisTable> tables = new HashSet<>();
+        private final HashMap<String, XbatisTable> tables = new HashMap<>();
         private final ShardAlgorithm groupShardAlgorithm;
         private final String[] groupShardKeys;
 
@@ -53,7 +53,11 @@ public final class XbatisDataSourceConfig {
         }
 
         public void addTable(String tableName, ShardAlgorithm algorithmClass, String[] shardKey) {
-            tables.add(new XbatisTable(tableName, algorithmClass, shardKey));
+            tables.put(tableName,new XbatisTable(tableName, algorithmClass, shardKey));
+        }
+
+        public XbatisTable getTable(String tableName){
+            return tables.get(tableName);
         }
 
         protected XbatisGroup getGroup(Map<String,Object> args) {

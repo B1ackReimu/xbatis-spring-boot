@@ -14,17 +14,17 @@ import java.util.HashMap;
 @Component
 public class XbatisAspect {
 
-    @Pointcut("execution(public * org.xbatis.spring.boot.autoconfigure.test.mapper.*.*(..)) ")
-    public void sss() {
-
-    }
-
-    @Around("sss()")
+    @Around(value = "@within(org.xbatis.spring.boot.autoconfigure.annotation.NameSpace)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         String[] parameterNames = methodSignature.getParameterNames();
-        System.out.println("parameterNames:" + parameterNames);
+        HashMap<String, Object> shardValueMap = new HashMap<>(parameterNames.length);
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < parameterNames.length; i++) {
+            shardValueMap.put(parameterNames[i], args[i]);
+        }
+        DataSourceSelector.setLocalShardValue(shardValueMap);
         String declaringTypeName = signature.getDeclaringTypeName().intern();
         DataSourceSelector.setLocalClass(declaringTypeName);
         String statementId = declaringTypeName + "." + signature.getName().intern();

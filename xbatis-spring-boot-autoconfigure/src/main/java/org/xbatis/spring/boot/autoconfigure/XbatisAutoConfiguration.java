@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xbatis.spring.boot.autoconfigure.annotation.Master;
 import org.xbatis.spring.boot.autoconfigure.annotation.NameSpace;
+import org.xbatis.spring.boot.autoconfigure.util.SqlRewriter;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -93,7 +94,7 @@ public class XbatisAutoConfiguration {
         }
         xbatisRouter.setClassShardAlgorithmMap(classShardAlgorithmMap);
         xbatisRouter.setMethodIsMasterSet(methodIsMasterSet);
-        sqlSessionFactory.getConfiguration().addInterceptor(new XbatisInterceptor());
+        sqlSessionFactory.getConfiguration().addInterceptor(new XbatisInterceptor(new SqlRewriter(xbatisRouter)));
     }
 
 

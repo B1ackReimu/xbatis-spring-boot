@@ -38,7 +38,8 @@ public class XbatisRouter extends AbstractRoutingDataSource {
         XbatisDataSourceConfig.XbatisNamespace.XbatisGroup group = classShardAlgorithmMap.get(lookupKey)
                 .getGroup(DataSourceSelector.getLocalShareValue());
         DataSource dataSource = randomDataSource(methodIsMasterSet.contains(DataSourceSelector.getLocalMethod()), group);
-        DataSourceSelector.removeAll();
+        DataSourceSelector.removeClass();
+        DataSourceSelector.removeMethod();
         return dataSource;
     }
 

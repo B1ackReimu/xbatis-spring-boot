@@ -32,9 +32,15 @@ public class DataSourceSelector {
         return LOCAL_METHOD.get();
     }
 
-    public static void removeAll() {
+    public static void removeClass() {
         LOCAL_CLASS.remove();
+    }
+
+    public static void removeMethod() {
         LOCAL_METHOD.remove();
+    }
+
+    public static void removeShareValue() {
         LOCAL_SHARD_VALUE.remove();
     }
 }

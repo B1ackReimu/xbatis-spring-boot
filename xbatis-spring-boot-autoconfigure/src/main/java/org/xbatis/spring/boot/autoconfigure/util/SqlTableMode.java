@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SqlTableMode {
-    private final HashMap<Integer, char[][]> modeMap = new HashMap<Integer, char[][]>(1 << ReplaceMode.values().length) {{
+    private static final HashMap<Integer, char[][]> modeMap = new HashMap<Integer, char[][]>(1 << ReplaceMode.values().length) {{
         ReplaceMode[] replaceModes = ReplaceMode.values();
         HashMap<Integer, char[]> tempMap = new HashMap<>(replaceModes.length);
         ArrayList<Integer> modes = new ArrayList<Integer>(replaceModes.length) {{
@@ -28,12 +28,16 @@ public class SqlTableMode {
         }
     }};
 
+    public static char[][] getReplaceFix(int mode){
+        return modeMap.get(mode);
+    }
+
     public enum ReplaceMode {
 
-        BTB(0b0001, new char[]{' ', ' '}),
-        CTB(0b0010, new char[]{',', ' '}),
-        BTC(0b0100, new char[]{' ', ','}),
-        CTC(0b1000, new char[]{',', ','});
+        BTB(0b0001, new char[]{' ', ' '}), // _table_
+        CTB(0b0010, new char[]{',', ' '}), // ,table_
+        BTC(0b0100, new char[]{' ', ','}), // _table,
+        CTC(0b1000, new char[]{',', ','}); // ,table,
         private final int mode;
         private final char[] prefixSuffix;
 
@@ -41,9 +45,14 @@ public class SqlTableMode {
             this.mode = mode;
             this.prefixSuffix = prefixSuffix;
         }
+
+        public int getMode() {
+            return mode;
+        }
+
     }
 
-    private ArrayList<ArrayList<Integer>> getAllReplaceMode(ArrayList<Integer> integers, int idx) {
+    private static ArrayList<ArrayList<Integer>> getAllReplaceMode(ArrayList<Integer> integers, int idx) {
         ArrayList<ArrayList<Integer>> all = new ArrayList<>();
         if (idx + 1 < integers.size()) {
             all = getAllReplaceMode(integers, idx + 1);

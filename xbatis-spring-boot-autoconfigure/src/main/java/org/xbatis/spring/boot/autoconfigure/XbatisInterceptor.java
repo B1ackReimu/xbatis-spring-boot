@@ -6,6 +6,7 @@ import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.xbatis.spring.boot.autoconfigure.util.SqlRewriter;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -17,11 +18,12 @@ public class XbatisInterceptor implements Interceptor {
 
     public static final ThreadLocal<String> STATEMENT_ID = new ThreadLocal<>();
 
-    private XbatisRouter xbatisRouter;
+
+    private SqlRewriter sqlRewriter;
 
     @Autowired
-    public void setXbatisRouter(XbatisRouter xbatisRouter) {
-        this.xbatisRouter = xbatisRouter;
+    public XbatisInterceptor(SqlRewriter sqlRewriter) {
+        this.sqlRewriter = sqlRewriter;
     }
 
     private Field field;
@@ -40,22 +42,12 @@ public class XbatisInterceptor implements Interceptor {
         StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
         BoundSql boundSql = statementHandler.getBoundSql();
         String sql = boundSql.getSql();
-        System.out.println(sql);
-        sql = sql.replace("id = 1", "id = 2");
-        field.set(boundSql, sql);
-        System.out.println(sql);
+        System.out.println("origin: " + sql);
+        String rewrite = sqlRewriter.rewrite(STATEMENT_ID.get(), sql);
+        field.set(boundSql, rewrite);
+        System.out.println("replace: " + rewrite);
+        STATEMENT_ID.remove();
         return invocation.proceed();
-    }
-
-    private String replaceSql(String statementId, String originSql) {
-        String s = originSql.replaceAll(" + ", " ");
-
-        return null;
-    }
-
-    public static void main(String[] args) {
-        String s = "select * from  a   where id =  5     ";
-        System.out.println(s.replaceAll("\\s+"," "));
     }
 
 }
