@@ -22,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ConditionalOnClass(XbatisDataSourceConfig.class)
 @Configuration
 @EnableConfigurationProperties({MybatisProperties.class})
-//@AutoConfigureBefore(DataSourceAutoConfiguration.class)
 public class XbatisAutoConfiguration {
 
     private final MybatisProperties properties;
